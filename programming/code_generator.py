@@ -17,7 +17,7 @@ def generate_code(run_info:RunInfo, problem_prompt:str, visible_assert_tests:str
                         f"The prompt you must complete will be contained within \"{get_start_tag(TagType.PROMPT)}\" and \"{get_end_tag(TagType.PROMPT)}\""
                         f"and the tests that the code must pass will be contained within \"{get_start_tag(TagType.VISIBLE_TEST)}\" and \"{get_end_tag(TagType.VISIBLE_TEST)}\"."
                         f"When you see \"Let\'s generate the program\" begin generating the program."
-                        f"[Example Start]\n{program_examples}\n[Example End]\n\n{wrap_in_tag(problem_prompt, TagType.PROMPT)}\n\n{wrap_in_tag(visible_assert_tests, TagType.VISIBLE_TEST)}\n\n \"Let\'s generate the program\"",
+                        f"\n\n{wrap_in_tag(problem_prompt, TagType.PROMPT)}\n\n{wrap_in_tag(visible_assert_tests, TagType.VISIBLE_TEST)}\n\n \"Let\'s generate the program\"",
                 ),
         ])
     

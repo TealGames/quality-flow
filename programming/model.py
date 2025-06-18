@@ -13,13 +13,13 @@ from model_utils import *
 from chatgpt_models import *
 
 def model_init(model: ModelName) -> None:
-    if (model== ModelName.ChatGPT):
+    if (is_chat_gpt_model(model)):
         chatgpt_init(str(model.value))
     else:
         raise Exception(f"Attempted to initialize a model of type:'{model.value}' but no actions were specified")
     
 def model_chat(model:ModelName, messages: List[Message])-> ModelChatResult:
-    if (model== ModelName.ChatGPT):
+    if (is_chat_gpt_model(model)):
         return chatgpt_chat(messages)
     else:
         raise Exception(f"Attempted to submit messages to a model:'{model.value}' with no actions defined")
