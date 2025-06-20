@@ -1,5 +1,5 @@
 
-from model import *
+from model_controller import *
 from message_globals import *
 from typing import Tuple, List, Dict
 from runinfo import *
@@ -26,26 +26,26 @@ def generate_code(run_info:RunInfo, problem_prompt:str, visible_assert_tests:str
     
 def prepare_function_from_generated_code(dataset_name:DatasetName, prompt:str, generated_program:str, entry_point:str, add_header = True) ->str:
     if dataset_name in [DatasetName.MBPP, DatasetName.HumanEval, DatasetName.APPS, DatasetName.CodeContests, DatasetName.LiveCode]:
-        function: str=""
+        function_impl: str=""
         if (prompt in generated_program) or (('def ' + entry_point + '(') in generated_program):
-            function = generated_program
+            function_impl = generated_program
         else:
-            function = prompt + "\n" + generated_program
+            function_impl = prompt + "\n" + generated_program
         # Add auxilary function
-        function=filter_function(function)
+        function_impl=filter_function(function_impl)
         funcs = get_function(prompt)
         seed_funcs = [func[0] for func in get_function(generated_program)]
         for func in funcs:
             if func[0] not in seed_funcs:
-                cur_func_impl = func[1] + "\n" + cur_func_impl
+                function_impl = func[1] + "\n" + function_impl
         # Add comments
-        if not find_comment(cur_func_impl, entry_point):
-            cur_func_impl = fix_func_impl_comments(cur_func_impl, prompt, entry_point)
+        if not find_comment(function_impl, entry_point):
+            function_impl = fix_func_impl_comments(function_impl, prompt, entry_point)
     # Add import header
-    if add_header and IMPORT_HEADER not in cur_func_impl:
-        cur_func_impl = IMPORT_HEADER + cur_func_impl
+    if add_header and IMPORT_HEADER not in function_impl:
+        function_impl = IMPORT_HEADER + function_impl
 
-    return cur_func_impl
+    return function_impl
 
 def get_function(prompt)-> List[List[str]]:
     lines = prompt.split('\n')

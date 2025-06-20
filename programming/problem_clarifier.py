@@ -2,7 +2,7 @@ from runinfo import *
 from dataset import *
 from typing import List
 from message_globals import *
-from model import *
+from model_controller import *
 
 def clarify_problem(run_info:RunInfo, task:DatasetTask, debugged_code:str)-> str:
     test_asserts_str= ""

@@ -1,6 +1,6 @@
 from runinfo import *
 from typing import Tuple, List, Dict
-from model import *
+from model_controller import *
 from message_globals import *
 from dataset import *
 import re
@@ -10,7 +10,7 @@ def check_code_quality(run_info:RunInfo, task:DatasetTask, program:str)-> bool:
     #TODO: should each test be a separate message?
     for test in task.split_asserts_by_io:
         chat_result:ModelChatResult = model_chat(run_info.model_name, [
-                CODE_WRITER_SYSTEM_MESSAGE,
+                OUTPUT_REASONER_SYSTEM_MESSAGE,
                 Message(
                     role="user",
                     content=f"Instructions: thinking step by step, determine the output of the program contained within the \"{get_start_tag(TagType.PROGRAM)}\" and \"{get_end_tag(TagType.PROGRAM)}\" tags"

@@ -3,7 +3,7 @@ import argparse
 from pathlib import Path
 from datetime import datetime
 from observer import *
-from model import *
+from model_controller import *
 from utils import *
 from dataset import *
 
@@ -16,11 +16,13 @@ from problem_clarifier import *
 
 BENCHMARK_PATH_ROOT: Path= Path("../benchmarks_with_tests")
 BENCHMARK_FILE= "probs.jsonl"
-DEFAULT_OUTPUT_DIR: str= "output"
+DEFAULT_OUTPUT_DIR: str= "../output"
 DEFAULT_MAX_ITERATIONS: int= 10
 USE_TEXT_QUALITY_CHECKER: bool = True
 
 def get_args():
+    global DEFAULT_OUTPUT_DIR, RUN_ALL_DATASET_PROBLEMS_VALUE, DEFAULT_MAX_ITERATIONS
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", type=str, help="The name of the model to run")
     parser.add_argument("--output_dir", type=str,
@@ -29,7 +31,7 @@ def get_args():
                         help="The name of the benchmark. Used to retrieve problems from default datasets")
     parser.add_argument("--dataset_path", type=str,
                         help="The path of the benchmark dataset. Used only for custom benchmarks not included in repository", default= "")
-    parser.add_argument("--problem_count", type=str,
+    parser.add_argument("--problem_count", type=int,
                         help="The number of problems to run from the dataset", default= RUN_ALL_DATASET_PROBLEMS_VALUE)               
     parser.add_argument("--max_iters", type=int,
                         help="The maximum number of self-improvement iterations", default=DEFAULT_MAX_ITERATIONS)
@@ -37,10 +39,12 @@ def get_args():
     return args
 
 def create_benchmark_path(benchmark:str)->str:
-    global BENCHMARK_PATH_ROOT
+    global BENCHMARK_PATH_ROOT, BENCHMARK_FILE
     return f"{BENCHMARK_PATH_ROOT}/{benchmark}/{BENCHMARK_FILE}"
 
 def solve_coding_task(run_info: RunInfo, task: DatasetTask)->DatasetTaskResult:
+    global USE_TEXT_QUALITY_CHECKER
+
     generated_code = generate_code(run_info, task.get_prompt(), task.get_test_asserts_consolidated(), task.get_created_func_name())
     passes_quality_checker= check_code_quality(run_info, task, generated_code)
     if (passes_quality_checker):
@@ -79,16 +83,19 @@ def main(args):
         raise Exception(f"Attempted to find dataset but run started with both a dataset name:'{args.dataset_name}'"
                         f"and path:'{args.dataset_path}' which is not allowed")
     
-    dataset_path: str= args.dataset_path if args.dataset_path!="" else create_benchmark_path (args.benchmark)
-    dataset= Dataset(dataset_path)
+    dataset_path: str= args.dataset_path if args.dataset_path!="" else create_benchmark_path (args.dataset_name)
+    dataset= Dataset(dataset_path, args.problem_count)
     run_info= RunInfo(args.model, args.dataset_name, dataset, args.problem_count, args.max_iters)
     model_init(run_info.model_name)
 
-    observer_init(Path(args.root_dir), args.max_iters)
+    observer_init(Path(args.output_dir), args.max_iters)
     observer_log_benchmark(run_info)
     
     pass_count: int =0
+    print(f"Total tasks:{len(dataset.tasks)}")
+
     for task in dataset.tasks:
+        print(f"Starting task:{task.get_id()}")
         code_task_result= solve_coding_task(run_info, task)
 
         code_test_result= function_with_timeout_process(code_task_result.code, task.get_test_asserts())
@@ -97,8 +104,10 @@ def main(args):
             pass_count+=1
 
         observer_log_task_result(task, code_task_result, passed_tests)
+        print(f"Completed task:{task.get_id()}")
 
     observer_finish_tasks(pass_count, len(dataset.tasks))
+    print(f"Completed all tasks. Check path '{args.output_dir}' for log info")
 
 if __name__ == "__main__":
     args = get_args()

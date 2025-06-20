@@ -2,7 +2,7 @@ from runinfo import *
 from dataset import *
 from typing import List
 from message_globals import *
-from model import *
+from model_controller import *
 from utils import regex_escape_special
 
 class SynthesizedTest:

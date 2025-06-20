@@ -17,6 +17,11 @@ python -m pip install -r requirements.txt
 ```
 cd ./programming
 ```
+5) Set API key/other model specific information
+### OpenAI API Key
+```
+set OPENAI_API_KEY= [API_KEY]
+```
 
 ## Running
 ```
@@ -30,7 +35,7 @@ python main.py --model gpt-4 --output_dir ../output --dataset_name HumanEval
 | Argument           | Meaning                                                                                                              |
 | ------------------ | -------------------------------------------------------------------------------------------------------------------- |
 | MODEL_NAME         | model to run                                                                                                         |
-| OUTPUT_DIRECTORY   | dataset task logs/stats                                                                                              |
+| OUTPUT_DIRECTORY   | dataset task logs/stats (OPTIONAL, Default: ./output)                                                                |
 | DATASET_NAME       | name of dataset to run                                                                                               |
 | DATASET_PATH       | path of dataset (OPTIONAL if DATASET_NAME in repository + valid)                                                     |
 | PROBLEM_COUNT      | number of problems from dataset to run (OPTIONAL, Default: all)                                                      |
@@ -39,5 +44,12 @@ python main.py --model gpt-4 --output_dir ../output --dataset_name HumanEval
 Available options:
 | Argument           | Values                                                                                                               |
 | ------------------ | -------------------------------------------------------------------------------------------------------------------- |
-| MODEL_NAME         | `gpt-3.5-turbo-0613`,`gpt-3.5-turbo-0125`, `gpt-4`(gpt-4-1106-preview), `gpt-4o`(gpt-4o-2024-05-13),`gpt-4o-mini'    |
+| MODEL_NAME         | `gpt-3.5-turbo-0125`, `gpt-4`(gpt-4-1106-preview), `gpt-4o`(gpt-4o-2024-05-13),`gpt-4o-mini'    |
 | DATASET_NAME       | `HumanEval`, `MBPP`, `HumanEval-ET`,`MBPP-ET`                                                                        |
+
+## Potential Issues
+If you intend to use ChatGPT while running on a conda environment and you get the error "TypeError: Client.__init__() got an unexpected keyword argument 'proxies'",
+you need to update the OpenAI package, which you can do by running the following:
+```
+pip install --upgrade openai
+```

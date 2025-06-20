@@ -1,4 +1,4 @@
-import model
+from model_controller import *
 from model_utils import *
 from dataset import *
 
@@ -12,7 +12,10 @@ class RunInfo:
     iterations:int
     
     def __init__(self, model_name:str, dataset_name: str, dataset:Dataset, problem_limit:int, iterations:int):
-        self.model_name=get_model_name(model_name)
+        maybe_model_name= get_model_name(model_name)
+        assert maybe_model_name is not None, f"Attempted to convert invalid model to enum: {model_name}"
+
+        self.model_name= maybe_model_name
         self.dataset_name= get_dataset_name(dataset_name)
         self.dataset= dataset
         self.dataset_problem_limit= problem_limit

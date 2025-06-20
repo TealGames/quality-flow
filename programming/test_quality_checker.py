@@ -2,7 +2,7 @@ from runinfo import *
 from dataset import *
 from typing import List
 from message_globals import *
-from model import *
+from model_controller import *
 from test_designer import SynthesizedTest
 from utils import regex_escape_special
 
@@ -10,7 +10,7 @@ def filter_valid_tests(run_info:RunInfo, task:DatasetTask, synthesizedTests: Lis
     valid_tests: List[SynthesizedTest]= []
     for test in synthesizedTests:
         chat_result:ModelChatResult = model_chat(run_info.model_name, [
-                    CODE_WRITER_SYSTEM_MESSAGE,
+                    OUTPUT_REASONER_SYSTEM_MESSAGE,
                     Message(
                         role="user",
                         content=f"Instructions: given a prompt contained within prompt tags: \"{get_start_tag(TagType.PROMPT)}\" and \"{get_end_tag(TagType.PROMPT)}\""

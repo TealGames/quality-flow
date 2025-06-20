@@ -26,14 +26,16 @@ def message_length_check(tokenizer, messages, max_len) -> list[Message]:
 
 
 class ModelName(Enum):
-    CHAT_GPT_TURBO_0613= "gpt-3.5-turbo-0613"
     CHAT_GPT_TURBO_0125= "gpt-3.5-turbo-0125" 
     CHAT_GPT_4= "gpt-4" 
     CHAT_GPT_4o= "gpt-4o"
     CHAT_GPT_4oMini= "gpt-4o-mini"
 
-def get_model_name(name: str) -> ModelName:
-    return ModelName[name]
+def get_model_name(name: str) -> ModelName | None:
+    for member in ModelName:
+        if member.value == name:
+            return member
+    return None
 
 def is_chat_gpt_model(model_name: ModelName)-> bool:
     return model_name.name.find("CHAT_GPT")!= -1

@@ -13,13 +13,17 @@ class TagType(Enum):
     UNIT_TEST= 4
     PROMPT= 5
 
-CODE_WRITER_SYSTEM_MESSAGE: Message=  Message(
+CODE_WRITER_SYSTEM_MESSAGE= Message(
     role="system",
     content="You are a Python writing assistant that only responds with Python programs to solve a Python writing problem.")
 
-PRINT_ADDER_SYSTEM_MESSAGE: Message=  Message(
+PRINT_ADDER_SYSTEM_MESSAGE= Message(
     role="system",
     content="You are a Python writing assistant that only responds with Python programs with PRINT statements")
+
+OUTPUT_REASONER_SYSTEM_MESSAGE = Message(
+    role="system",
+    content="You are a Python program reasoning assistant that analyzes a Python program and determines its output given the input")
 
 def wrap_in_tag(text: str, tag: TagType) -> str:
     return f"{get_start_tag(tag)}\n{text}\n{get_end_tag(tag)}"

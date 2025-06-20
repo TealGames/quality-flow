@@ -2,7 +2,7 @@ from runinfo import *
 from dataset import *
 from typing import List, NamedTuple
 from message_globals import *
-from model import *
+from model_controller import *
 import multiprocessing
 import sys
 from io import StringIO
