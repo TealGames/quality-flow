@@ -7,22 +7,29 @@ import re
 from dataset import *
 
 IMPORT_HEADER:str = "from typing import *\nimport math\nfrom heapq import *\nimport itertools\nimport re\nimport typing\nimport heapq\n_str=str\nimport re\nimport hashlib\nimport heapq\nimport collections\nfrom collections import *\nfrom itertools import combinations\nfrom math import prod\nfrom itertools import combinations_with_replacement\nfrom  decimal import Decimal, getcontext\nimport numpy as np\n"
+TEMPERATURE:float= 0
 
-def generate_code(run_info:RunInfo, problem_prompt:str, visible_assert_tests:str, problem_func_name:str)-> str:
+def generate_code(run_info:RunInfo, task: DatasetTask, diversified_prompt: str, visible_assert_tests:str, problem_func_name:str)-> str:
     chat_result:ModelChatResult = model_chat(run_info.model_name, [
             CODE_WRITER_SYSTEM_MESSAGE,
             Message(
                 role="user",
-                content=f"Instructions: When generating your code please follow the examples specified with example tags \"[Example Start]\" and closing with \"[Example End]\"."
-                        f"The prompt you must complete will be contained within \"{get_start_tag(TagType.PROMPT)}\" and \"{get_end_tag(TagType.PROMPT)}\""
+                content=f"Instructions: You will be given a coding problem prompt contained within \"{get_start_tag(TagType.PROMPT)}\" and \"{get_end_tag(TagType.PROMPT)}\""
                         f"and the tests that the code must pass will be contained within \"{get_start_tag(TagType.VISIBLE_TEST)}\" and \"{get_end_tag(TagType.VISIBLE_TEST)}\"."
+                        f"{diversified_prompt}"
                         f"When you see \"Let\'s generate the program\" begin generating the program."
-                        f"\n\n{wrap_in_tag(problem_prompt, TagType.PROMPT)}\n\n{wrap_in_tag(visible_assert_tests, TagType.VISIBLE_TEST)}\n\n \"Let\'s generate the program\"",
+                        f"\n\n{wrap_in_tag(task.get_prompt(), TagType.PROMPT)}\n\n{wrap_in_tag(visible_assert_tests, TagType.VISIBLE_TEST)}\n\n \"Let\'s generate the program\"",
                 ),
-        ])
+        ], TEMPERATURE)
     
     generated_program: str= chat_result.output
-    return prepare_function_from_generated_code(run_info.dataset_name, problem_prompt, generated_program, problem_func_name)
+    return prepare_function_from_generated_code(run_info.dataset_name, task.get_prompt(), generated_program, problem_func_name)
+
+def get_code_gen_prompt_from_iteration(task: DatasetTask, iteration_index:int)-> str:
+    if (iteration_index==0):
+        return ("Your goal is to generate the program that follows the given prompt and passes the visible tests given")
+    else:
+        raise ValueError(f"Attempted to get prompt for self debug iteration:{iteration_index} for prompt:{task.get_id()} but none were found")
     
 def prepare_function_from_generated_code(dataset_name:DatasetName, prompt:str, generated_program:str, entry_point:str, add_header = True) ->str:
     if dataset_name in [DatasetName.MBPP, DatasetName.HumanEval, DatasetName.APPS, DatasetName.CodeContests, DatasetName.LiveCode]:

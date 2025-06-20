@@ -18,9 +18,9 @@ def model_init(model: ModelName) -> None:
     else:
         raise Exception(f"Attempted to initialize a model of type:'{model.value}' but no actions were specified")
     
-def model_chat(model:ModelName, messages: List[Message])-> ModelChatResult:
+def model_chat(model:ModelName, messages: List[Message], temperature:float)-> ModelChatResult:
     if (is_chat_gpt_model(model)):
-        return chatgpt_chat(messages)
+        return chatgpt_chat(messages, temperature)
     else:
         raise Exception(f"Attempted to submit messages to a model:'{model.value}' with no actions defined")
 

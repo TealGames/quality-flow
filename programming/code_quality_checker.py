@@ -6,6 +6,8 @@ from dataset import *
 import re
 from utils import regex_escape_special
 
+TEMPERATURE:float= 0
+
 def check_code_quality(run_info:RunInfo, task:DatasetTask, program:str)-> bool:
     #TODO: should each test be a separate message?
     for test in task.split_asserts_by_io:
@@ -18,7 +20,7 @@ def check_code_quality(run_info:RunInfo, task:DatasetTask, program:str)-> bool:
                     f"Your response should be contained within \"{get_start_tag(TagType.OUTPUT)}\" and \"{get_end_tag(TagType.OUTPUT)}\" "
                     f"{wrap_in_tag(program, TagType.PROGRAM)}\n\n{wrap_in_tag(test[0], TagType.INPUT)}"
                     ),
-            ])
+            ], TEMPERATURE)
         if (extract_output(chat_result.output)!=test[1]):
             return False
         

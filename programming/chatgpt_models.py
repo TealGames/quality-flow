@@ -6,7 +6,6 @@ from model_utils import *
 from typing import Union
 
 MAX_TOKENS:int= 1024
-DEFAULT_TEMPERATURE:float= 0.2
 MESSAGE_CHOICE_INDEX: int =0
 API_KEY_VAR_NAME: str= "OPENAI_API_KEY"
 
@@ -23,7 +22,7 @@ def chatgpt_init(model_name:str):
     openai.api_key = os.getenv(API_KEY_VAR_NAME)
     Model= ChatGPTModel(model_name)
 
-def chatgpt_chat(messages: List[Message]) -> ModelChatResult:
+def chatgpt_chat(messages: List[Message], chat_temperature:float) -> ModelChatResult:
     if Model is None:
         raise Exception("Attempted to make chat gpt chat message(s) but model information is not initialized")
 
@@ -33,7 +32,7 @@ def chatgpt_chat(messages: List[Message]) -> ModelChatResult:
         response = Model.client.chat.completions.create(
             model=Model.name,
             messages=[dataclasses.asdict(message) for message in messages],
-            temperature=DEFAULT_TEMPERATURE,
+            temperature=chat_temperature,
             top_p=1,
             frequency_penalty=0.0,
             presence_penalty=0.0,
@@ -50,7 +49,7 @@ def chatgpt_chat(messages: List[Message]) -> ModelChatResult:
                 model=Model.name,
                 messages=[dataclasses.asdict(message) for message in messages],
                 max_tokens=MAX_TOKENS,
-                temperature=DEFAULT_TEMPERATURE,
+                temperature=chat_temperature,
                 top_p=1,
                 frequency_penalty=0.0,
                 presence_penalty=0.0,

@@ -4,6 +4,8 @@ from typing import List
 from message_globals import *
 from model_controller import *
 
+TEMPERATURE:float =0
+
 def clarify_problem(run_info:RunInfo, task:DatasetTask, debugged_code:str)-> str:
     test_asserts_str= ""
     for test_assert in task.get_test_asserts():
@@ -19,5 +21,5 @@ def clarify_problem(run_info:RunInfo, task:DatasetTask, debugged_code:str)-> str
                     f"and the debugged code in \"{get_start_tag(TagType.PROGRAM)}\" and \"{get_end_tag(TagType.PROGRAM)}\"."
                     f"{wrap_in_tag(task.get_prompt(), TagType.PROMPT)}\n\n{wrap_in_tag(test_asserts_str, TagType.VISIBLE_TEST)}\n\n{wrap_in_tag(debugged_code, TagType.PROGRAM)}"
                     )
-            ])
+            ], TEMPERATURE)
     return chat_result.output

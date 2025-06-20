@@ -13,6 +13,8 @@ import astunparse
 from test_designer import SynthesizedTest
 from code_generator import prepare_function_from_generated_code
 
+TEMPERATURE:float =0
+
 class CodeExecutionResult():
     def __init__(self, passed_test_count: int, failed_test_outputs:list[str], failed_timeout_test_indices:List[int], timeout_test_indices:List[int]):
         self.passed_test_count= passed_test_count
@@ -50,7 +52,7 @@ class PropagatingThread(Thread):
         self._stop()
 
 
-def debug_code(run_info:RunInfo, task:DatasetTask, program:str, synthesized_tests:List[SynthesizedTest])-> str:
+def debug_code(run_info:RunInfo, task:DatasetTask, diversified_prompt: str, program:str, synthesized_tests:List[SynthesizedTest])-> str:
     test_results_info= ""
     for test in synthesized_tests:
         test_result: CodeExecutionResult = function_with_timeout_process(program, [test.get_as_assert(task.get_created_func_name())])
@@ -65,13 +67,21 @@ def debug_code(run_info:RunInfo, task:DatasetTask, program:str, synthesized_test
                 role="user",
                 content=f"Instructions: you are given a problem within the tags \"{get_start_tag(TagType.PROMPT)}\" and \"{get_end_tag(TagType.PROMPT)}\""
                 f"as well as a generated program attempting to solve the problem, which will be given in program tags, \"{get_start_tag(TagType.PROGRAM)}\" and \"{get_end_tag(TagType.PROGRAM)}\", "
-                f"and synthesized test cases for this problem with their respective output when run on the program given (in test tags \"{get_start_tag(TagType.UNIT_TEST)}\" and \"{get_end_tag(TagType.UNIT_TEST)}\""
-                f"Thinking step by step, use the information given to first analyze why the program fails the test(s) and then revise the program so it would not fail the tests based on your step-by-step analysis."
+                f"and synthesized test cases for this problem with their respective output when run on the program given (in test tags \"{get_start_tag(TagType.UNIT_TEST)}\" and \"{get_end_tag(TagType.UNIT_TEST)}\")"
+                f"{diversified_prompt}"
                 f"Place the new revised program enclosed in output tags \"{get_start_tag(TagType.OUTPUT)}\" and \"{get_end_tag(TagType.OUTPUT)}\"."
-                f"{wrap_in_tag(task.get_prompt(), TagType.PROMPT)}\n\n{wrap_in_tag(program, TagType.PROGRAM)}\n\n{wrap_in_tag(test_results_info, TagType.UNIT_TEST)}")
-        ])
+                f"{wrap_in_tag(task.get_prompt(), TagType.PROMPT)}\n\n{wrap_in_tag(program, TagType.PROGRAM)}\n\n{wrap_in_tag(test_results_info, TagType.UNIT_TEST)}")], 
+            TEMPERATURE)
     
     return prepare_function_from_generated_code(run_info.dataset_name, task.get_prompt(), program, task.get_created_func_name())
+
+def get_debug_prompt_from_iteration(task:DatasetTask, iteration_index:int)-> str:
+    #TODO: update to include different prompts for different iterations
+    if (iteration_index>=0):
+        return ("Thinking step by step, use the information given to first analyze why the program fails the test(s)"
+                "and then revise the program so it would not fail the tests based on your step-by-step analysis.")
+    else:
+        raise ValueError(f"Attempted to get prompt for self debug iteration:{iteration_index} for prompt:{task.get_id()} but none were found")
 
 def function_with_timeout_process(code_str: str, asserts: List[str], timeout= 60) ->CodeExecutionResult:
     result=find_syntax_error(code_str)

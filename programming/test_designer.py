@@ -5,6 +5,10 @@ from message_globals import *
 from model_controller import *
 from utils import regex_escape_special
 
+TEMPERATURE:float =0.1
+TEST_GENERATION_ROUNDS: int = 5
+TESTS_GENERATED_PER_ROUND: int = 10
+
 class SynthesizedTest:
     def __init__(self, input: str, output: str):
         self.input= input
@@ -15,18 +19,19 @@ class SynthesizedTest:
 
 
 def design_tests(run_info:RunInfo, task : DatasetTask) -> List[SynthesizedTest]:
-    chat_result:ModelChatResult = model_chat(run_info.model_name, [
-                CODE_WRITER_SYSTEM_MESSAGE,
-                Message(
-                    role="user",
-                    content=f"Instructions: given a program contained within program tags: \"{get_start_tag(TagType.PROGRAM)}\" and \"{get_end_tag(TagType.PROGRAM)}\""
-                    f"as well as visible tests within the test tags \"{get_start_tag(TagType.VISIBLE_TEST)}\" and \"{get_end_tag(TagType.VISIBLE_TEST)}\", "
-                    f"generate common case unit tests such that each test is enclosed with test tags \"{get_start_tag(TagType.UNIT_TEST)}\" and \"{get_end_tag(TagType.UNIT_TEST)}\""
-                    f"and that each unit test contains the input as it would be provided to the function with each input value separated by a space enclosed in tags \"{get_start_tag(TagType.INPUT)}\" and \"{get_end_tag(TagType.INPUT)}\"."
-                    f"Each unit test should also include the expected output from the unit test enclosed in output tags: \"{get_start_tag(TagType.OUTPUT)}\" and \"{get_end_tag(TagType.OUTPUT)}\""
-                    f"Here is an example of the formatting: "
-                    )
-            ])
+    for i in range(TEST_GENERATION_ROUNDS):
+        chat_result:ModelChatResult = model_chat(run_info.model_name, [
+                    CODE_WRITER_SYSTEM_MESSAGE,
+                    Message(
+                        role="user",
+                        content=f"Instructions: given a program contained within program tags: \"{get_start_tag(TagType.PROGRAM)}\" and \"{get_end_tag(TagType.PROGRAM)}\""
+                        f"as well as visible tests within the test tags \"{get_start_tag(TagType.VISIBLE_TEST)}\" and \"{get_end_tag(TagType.VISIBLE_TEST)}\", "
+                        f"generate {TESTS_GENERATED_PER_ROUND} common case unit tests such that each test is enclosed with test tags \"{get_start_tag(TagType.UNIT_TEST)}\" and \"{get_end_tag(TagType.UNIT_TEST)}\""
+                        f"and that each unit test contains the input as it would be provided to the function with each input value separated by a space enclosed in tags \"{get_start_tag(TagType.INPUT)}\" and \"{get_end_tag(TagType.INPUT)}\"."
+                        f"Each unit test should also include the expected output from the unit test enclosed in output tags: \"{get_start_tag(TagType.OUTPUT)}\" and \"{get_end_tag(TagType.OUTPUT)}\""
+                        f"Here is an example of the formatting: "
+                        )
+                ], TEMPERATURE)
     
     return extract_unit_tests(chat_result.output)
     

@@ -82,14 +82,16 @@ class DatasetTaskResult:
     #the total number of code generations, including debug iterations
     code_generations: int
     debug_iterations: int
+    clarify_iterations: int
     synthesized_test_count: int
     #the number of tests that remain after filtering synthesized tests
     filtered_test_count:int
 
-    def __init__(self, code: str, code_generations:int, debug_iterations:int, synthesized_test_count:int, filtered_test_count:int):
+    def __init__(self, code: str, code_generations:int, debug_iterations:int, clarify_iterations:int, synthesized_test_count:int, filtered_test_count:int):
         self.code= code
         self.code_generations= code_generations
         self.debug_iterations= debug_iterations
+        self.clarify_iterations= clarify_iterations
         self.synthesized_test_count= synthesized_test_count
         self.filtered_test_count= filtered_test_count
 

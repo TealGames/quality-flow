@@ -19,12 +19,15 @@ def observer_init(output_dir: Path, max_iterations:int) -> None:
 def observer_log_benchmark(run_info:RunInfo) -> None:
     global log_path
     write_file(log_path, f"Dataset: {run_info.dataset_name.name}\nModel:{run_info.model_name.value}\n" +
-              f"LimitedPrompts:{run_info.dataset_problem_limit}\n" if run_info.has_dataset_problem_limit() else ""+ f"MaxIterations:{run_info.iterations}")
+              f"LimitedPrompts:{run_info.dataset_problem_limit}\n" if run_info.has_dataset_problem_limit() else ""+ 
+              f"MaxIterations:{run_info.iterations}\nMaxClarifyAttempts:{run_info.clarifier_attempts}SolutionsPerTask:{run_info.solutions_per_task}")
 
-def observer_log_task_result(task: DatasetTask, task_result: DatasetTaskResult, task_success: bool) -> None:
+def observer_log_task_result(task: DatasetTask, task_result: DatasetTaskResult, passed_at_solution_index: int) -> None:
     global log_path
     write_file(log_path, f"\n\nTask:{task.get_id()}\nCodeGenerations:{task_result.code_generations}\nDebugIterations:{task_result.debug_iterations}\n"
-               f"SynthesizedTestsCount:{task_result.synthesized_test_count}\nFilteredTestCount:{task_result.filtered_test_count}\nPassed:{task_success}")
+               f"ClarifierAttempts:{task_result.clarify_iterations}\nSynthesizedTestsCount:{task_result.synthesized_test_count}\n"
+               f"FilteredTestCount:{task_result.filtered_test_count}\nPassed:{passed_at_solution_index!=-1}\n"
+               f"SolutionNumber(0-indexed): {'NONE' if passed_at_solution_index==-1 else passed_at_solution_index}")
 
 def observer_finish_tasks(total_passed:int, total_prompts:int):
     global log_path
